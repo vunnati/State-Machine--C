@@ -1,0 +1,296 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+int i;
+int j;
+char isGar;
+int garVal;
+char gar[8];
+
+struct stateMachine{
+	char name;
+	int zeroVal;
+	int oneVal;
+	int del;
+	int stateNum;
+	struct stateMachine *zero;
+	struct stateMachine *one;
+}
+
+states[8];
+
+void state(){
+	states[0].name = 'A';
+	states[0].stateNum = 0;
+	states[0].zero = &states[0];
+	states[0].zeroVal = 0;
+	states[0].one = &states[1];
+	states[0].oneVal = 1;
+	states[0].del = '\0';
+
+	states[1].name = 'B';
+	states[1].stateNum = 1;
+	states[1].zero = &states[7];
+	states[1].zeroVal = 7;
+	states[1].one = &states[2];
+	states[1].oneVal = 2;
+	states[1].del = '\0';
+
+	states[2].name = 'C';
+	states[2].stateNum = 2;
+	states[2].zero = &states[6];
+	states[2].zeroVal = 6;
+	states[2].one = &states[3];
+	states[2].oneVal = 3;
+	states[2].del = '\0';
+
+	states[3].name = 'D';
+	states[3].stateNum = 3;
+	states[3].zero = &states[5];
+	states[3].zeroVal = 5;
+	states[3].one = &states[7];
+	states[3].oneVal = 7;
+	states[3].del = '\0';
+
+	states[4].name = 'E';
+	states[4].stateNum = 4;
+	states[4].zero = &states[0];
+	states[4].zeroVal = 0;
+	states[4].one = &states[5];
+	states[4].oneVal = 5;
+	states[4].del = '\0';
+	
+	states[5].name = 'F';
+	states[5].stateNum = 5;
+	states[5].zero = &states[4];
+	states[5].zeroVal = 4;
+	states[5].one = &states[6];
+	states[5].oneVal = 6;
+	states[5].del = '\0';
+	
+	states[6].name = 'G';
+	states[6].stateNum = 6;
+	states[6].zero = &states[3];
+	states[6].zeroVal = 3;
+	states[6].one = &states[0];
+	states[6].oneVal = 0;
+	states[6].del = '\0';
+
+	states[7].name = 'H';
+	states[7].stateNum = 7;
+	states[7].zero = &states[2];
+	states[7].zeroVal = 2;
+	states[7].one = &states[4];
+	states[7].oneVal = 4;
+	states[7].del = '\0';
+}
+
+void print(){
+	for(i = 0; i<8;i++){
+		if(states[i].del != 1){
+			fprintf(stdout, "%c %c %c\n", states[i].name, states[i].zero->name, states[i].one->name);
+		}
+	}
+}
+
+void garbage(){
+	int z = 0;
+	for (i=0; i<8; i++){
+		gar[i]='\0';
+	}
+	
+	for(i = 0;i<8;i++){
+		if(states[i].del != 1){
+			isGar = states[i].name;
+			garVal = 1;
+				for(j = 0;j<8;j++){
+					if(states[j].del != 1){
+						if(states[j].zero->name == isGar || states[j].one->name == isGar){
+							if(states[j].name != isGar){
+								garVal = 0;
+							}
+						}
+					}
+				}
+			if(garVal == 1){
+				gar[z] = isGar;
+				printf("%c", garVal);
+				z++;
+			}
+		}
+	}
+	
+	if(gar[0] == '\0'){
+		printf("No garbage\n");
+	}
+	if(gar[0] != '\0'){
+		for(i = 0; i<8; i++){
+			if(gar[i]!='\0'){
+				fprintf(stdout, "Garbage: %c\n", gar[i]);
+			}
+		}
+	}
+}
+
+void deleteState(){
+	if(gar[0]!='\0'){
+		if(states[garVal].del != 1){
+			for(i = 0; i<8; i++){
+				if(gar[i] != '\0'){
+					fprintf(stdout, "Deleted: %c\n", gar[i]);
+					for(j = 0; j<8; j++){
+						if(states[j].name == gar[i]){
+							states[j].del = 1;
+						}
+					}
+				}
+			}
+		}
+	}
+	else{
+		printf("No states deleted\n");
+	}
+}
+
+int main(int argc, char * argv[])
+{
+	char choice[3];
+	j = 0;
+	state();
+	struct stateMachine currentState = states[3];
+	fprintf(stdout, "Starting state is: %c\n", currentState.name);
+
+	while(j != 1){
+		choice[0] = '\0';
+		choice[1] = '\0';
+		choice[2] = '\0';
+		i = 0;
+		printf("Enter your command: \n");
+		while(i!=3){
+			scanf(" %c", &choice[i]);
+			if(choice[i] == 'p'||choice[i] == '1'||choice[i] == '0'||choice[i] == 'q'||choice[i] == 'g' || choice[i] == 'd'){
+				break;
+			}
+			
+			i++;
+			scanf(" %c", &choice[i]);
+			i++;
+			scanf(" %c", &choice[i]);
+			i++;
+		}
+		 
+		if(choice[0] == 'p'){
+			print();
+		}
+				
+		if(choice[0] == '0'){
+			fprintf(stdout, "%c\n", currentState.zero->name);
+			currentState = states[currentState.zero->stateNum];
+		}
+				
+		if(choice[0] == '1'){
+			fprintf(stdout, "%c\n", currentState.one->name);
+			currentState = states[currentState.one->stateNum];
+		}
+			
+		if(choice[0] == 'g'){
+			garbage();
+		}
+				
+		if(choice[0]=='d'){
+			deleteState();
+		}
+				
+		if(choice[0] == 'q'){
+			j = 1;
+		}
+				
+		if(choice[0] == 'c'){
+			if(choice[1] == '0'){
+				if(choice[2] == 'A'){
+					currentState.zero = &states[0];
+					states[currentState.stateNum].zero = &states[0];
+					states[currentState.stateNum].zeroVal = 0;
+				}
+				if(choice[2] == 'B'){
+					currentState.zero = &states[1];
+					states[currentState.stateNum].zero = &states[1];
+					states[currentState.stateNum].zeroVal = 1;
+				}
+				if(choice[2] == 'C'){
+					currentState.zero = &states[2];
+					states[currentState.stateNum].zero = &states[2];
+					states[currentState.stateNum].zeroVal = 2;
+				}
+				if(choice[2] == 'D'){
+					currentState.zero = &states[3];
+					states[currentState.stateNum].zero = &states[3];
+					states[currentState.stateNum].zeroVal = 3;
+				}
+				if(choice[2] == 'E'){
+					currentState.zero = &states[4];
+					states[currentState.stateNum].zero = &states[4];
+					states[currentState.stateNum].zeroVal = 4;
+				}
+				if(choice[2] == 'F'){
+					currentState.zero = &states[5];
+					states[currentState.stateNum].zero = &states[5];
+					states[currentState.stateNum].zeroVal = 5;
+				}
+				if(choice[2] == 'G'){
+					currentState.zero = &states[6];
+					states[currentState.stateNum].zero = &states[6];
+					states[currentState.stateNum].zeroVal = 6;
+				}
+				if(choice[2] == 'H'){
+					currentState.zero = &states[7];
+					states[currentState.stateNum].zero = &states[7];
+					states[currentState.stateNum].zeroVal = 7;
+				}
+			}
+			if(choice[1] == '1'){
+				if(choice[2] == 'A'){
+					currentState.one = &states[0];
+					states[currentState.stateNum].one = &states[0];
+					states[currentState.stateNum].oneVal = 0;
+				}
+				if(choice[2] == 'B'){
+					currentState.one = &states[1];
+					states[currentState.stateNum].one = &states[1];
+					states[currentState.stateNum].oneVal = 1;
+				}
+				if(choice[2] == 'C'){
+					currentState.one = &states[2];
+					states[currentState.stateNum].one = &states[2];
+					states[currentState.stateNum].oneVal = 2;
+				}
+				if(choice[2] == 'D'){
+					currentState.one = &states[3];
+					states[currentState.stateNum].one = &states[3];
+					states[currentState.stateNum].oneVal = 3;
+				}
+				if(choice[2] == 'E'){
+					currentState.one = &states[4];
+					states[currentState.stateNum].one = &states[4];
+					states[currentState.stateNum].oneVal = 4;
+				}
+				if(choice[2] == 'F'){
+					currentState.one = &states[5];
+					states[currentState.stateNum].one = &states[5];
+					states[currentState.stateNum].oneVal = 5;
+				}
+				if(choice[2] == 'G'){
+					currentState.one = &states[6];
+					states[currentState.stateNum].one = &states[6];
+					states[currentState.stateNum].oneVal = 6;
+				}
+				if(choice[2] == 'H'){
+					currentState.one = &states[7];
+					states[currentState.stateNum].one = &states[7];
+					states[currentState.stateNum].oneVal = 7;
+				}
+			}
+		}
+	}
+	return(0);
+}
